@@ -2,27 +2,44 @@
 <s:Application xmlns:mx="library://ns.adobe.com/flex/mx" 
 				xmlns:fx="http://ns.adobe.com/mxml/2009" 
 				xmlns:s="library://ns.adobe.com/flex/spark" 
-				xmlns:com="com.flashdev.file.*" >
+				xmlns:com="com.flashdev.file.*"
+				creationComplete="initVars()"
+				>
 	
 	<fx:Script>
 		<![CDATA[
-		
+			import com.demonsters.debugger.MonsterDebugger;
+			
 			import mx.controls.Alert;
 			
-			private const _strDomain:String = new String("");
-			private const _strUploadScript:String = new String(_strDomain + "upload.php");
+			[Bindable]
+			private var _strUploadScript:String = null;
 			
-			
-			
+			private function initVars():void {
+				MonsterDebugger.initialize(this);
+				
+				_strUploadScript = this.parameters.uploadScript;
+				MonsterDebugger.trace('creationComplete parameter uploadScript', _strUploadScript);
+			}
 		]]>
 	</fx:Script>
 	
 	<s:Group width="400" height="300" horizontalCenter="0" verticalCenter="0">
+		<!--
+		Event messages translations:
+		EN:
+			uploadComplete:			"Alert.show('File(s) have been uploaded.', 'Upload successful')"
+			uploadIOError:			"Alert.show('IO Error in uploading file.', 'Error')"
+			uploadSecurityError:	"Alert.show('Security Error in uploading file.', 'Error')"
+			uploadStatusError:		n/a
+		-->
 		<com:FileUpload skinClass="skins.FileUploadSkin"
 			width="100%" height="100%"
 			uploadUrl="{_strUploadScript}"
-			uploadComplete="Alert.show('File(s) have been uploaded.', 'Upload successful')" 
-			uploadIOError="Alert.show('IO Error in uploading file.', 'Error')" 
-			uploadSecurityError="Alert.show('Security Error in uploading file.', 'Error')"/>
+			uploadComplete="Alert.show('Invio completato con successo.', 'Upload completato')" 
+			uploadIOError="Alert.show('Errore di IO.', 'Errore')" 
+			uploadSecurityError="Alert.show('Errore di sicurezza.', 'Errore')"
+			uploadStatusError="Alert.show('Risposta errata dal server.', 'Errore')"
+		/>
 	</s:Group>
 </s:Application>

@@ -12,12 +12,12 @@
 		[Event(name="uploadCancel", type="flash.events.Event")]
 		[Event(name="uploadIOError", type="flash.events.IOErrorEvent")]
 		[Event(name="uploadSecurityError", type="flash.events.SecurityErrorEvent")]
+		[Event(name="uploadStatusError", type="flash.events.HTTPStatusEvent")]
 	</fx:Metadata>
 		
 		
 	<s:Panel
 			width="100%" minWidth="400" height="100%" minHeight="200"
-			title="Upload Files" 
 			skinClass="{skinClass}"
 			creationComplete="initCom()">
 		
@@ -31,8 +31,10 @@
 				allowMultipleSelection="true" verticalScrollPolicy="on"
 				draggableColumns="false" resizableColumns="false" sortableColumns="false">
 				<mx:columns>
-					<mx:DataGridColumn headerText="File" dataField="name" wordWrap="true"/>
-					<mx:DataGridColumn headerText="Size" dataField="size" width="75" textAlign="right"/>
+					<!-- EN: File -->
+					<mx:DataGridColumn headerText="Nome" dataField="name" wordWrap="true"/>
+					<!-- EN: Size -->
+					<mx:DataGridColumn headerText="Dimensione" dataField="size" width="75" textAlign="right"/>
 				</mx:columns>
 			</mx:DataGrid>
 		</s:Group>
@@ -40,11 +42,19 @@
 		
 		<s:controlBarContent>
 
-			<mx:Button id="btnAdd" toolTip="Add file(s)" click="addFiles()" icon="@Embed('assets/add.png')" width="26"/>
-			<mx:Button id="btnRemove" toolTip="Remove file(s)" click="removeFiles()" icon="@Embed('assets/delete.png')" width="26"/>
+			<!-- EN: Add file(s) -->
+			<mx:Button id="btnAdd" toolTip="Aggiungi files" click="addFiles()" icon="@Embed('assets/add.png')" width="26"/>
+			
+			<!-- EN: Remove file(s) -->
+			<mx:Button id="btnRemove" toolTip="Rimuovi files" click="removeFiles()" icon="@Embed('assets/delete.png')" width="26"/>
+			
 			<mx:ProgressBar id="progBar" mode="manual" label="" labelPlacement="center" width="100%"/>
-			<mx:Button id="btnCancel" toolTip="Cancel upload" icon="@Embed('assets/cancel2.png')" width="26" click="onUploadCanceled()"/>
-			<mx:Button label="Upload" toolTip="Upload file(s)" id="btnUpload" click="startUpload()" icon="@Embed('assets/bullet_go.png')"/>
+			
+			<!-- EN: Cancel upload -->
+			<mx:Button id="btnCancel" toolTip="Annulla invio" icon="@Embed('assets/cancel2.png')" width="26" click="onUploadCanceled()"/>
+			
+			<!-- EN: Uploas file(s) -->
+			<mx:Button label="Invia" toolTip="Invia files" id="btnUpload" click="startUpload()" icon="@Embed('assets/bullet_go.png')"/>
 			
 		</s:controlBarContent>
 

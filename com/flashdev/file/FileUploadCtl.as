@@ -20,7 +20,7 @@
             import mx.events.*;
 			import flash.events.*;
 			import flash.net.*;
-			import nl.demonsters.debugger.MonsterDebugger;
+			import com.demonsters.debugger.MonsterDebugger;
 			
 			private var _strUploadUrl:String;
 			private var _refAddFiles:FileReferenceList;	
@@ -42,7 +42,8 @@
 				enableUI();
 				uploadCheck();
 				
-				updateStatus("Status: no files selected.");
+				// updateStatus("Status: no files selected.");	// EN
+				updateStatus("Stato: nessun file selezionato.");	// IT
 			}
 			
 			// Called to add file(s) for upload
@@ -76,13 +77,15 @@
 					listFiles.selectedIndex = _arrUploadFiles.length - 1;
 				}				
 				if (arrFoundList.length >= 1) {
-					Alert.show("The file(s): \n\n• " + arrFoundList.join("\n• ") + "\n\n...are already on the upload list. Please change the filename(s) or pick a different file.", "File(s) already on list");
+					// Alert.show("The file(s): \n\n• " + arrFoundList.join("\n• ") + "\n\n...are already on the upload list. Please change the filename(s) or pick a different file.", "File(s) already on list");		// EN
+					Alert.show("I files: \n\n• " + arrFoundList.join("\n• ") + "\n\n... sono già in lista. Cambiare il nome del file o selezionarne altri.", "File già in lista");	// IT
 				}
 				updateProgBar();
 				scrollFiles();
 				uploadCheck();
 				
-				updateStatus("Status: files selected for upload.");
+				// updateStatus("Status: files selected for upload.");	// EN
+				updateStatus("Stato: files pronti per essere inviati.");	// IT
 			}
 			
 			// Called to format number to file size
@@ -190,13 +193,13 @@
 				   	_refUploadFile.addEventListener(Event.COMPLETE, onUploadComplete);
 				    _refUploadFile.addEventListener(IOErrorEvent.IO_ERROR, onUploadIoError);
 				  	_refUploadFile.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadSecurityError);
-				   _refUploadFile.upload(request, "file", false);
-				   
-				   _refUploadFile.addEventListener(Event.OPEN, function(evt:Event):void { MonsterDebugger.trace(this, evt) } );
-				    _refUploadFile.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(evt:DataEvent):void { MonsterDebugger.trace(this, evt) } );
-					 _refUploadFile.addEventListener(HTTPStatusEvent.HTTP_STATUS, function(evt:HTTPStatusEvent):void{MonsterDebugger.trace(this, evt)});
-
- 
+					_refUploadFile.addEventListener(HTTPStatusEvent.HTTP_STATUS, onUploadStatusError );
+					_refUploadFile.upload(request, "file", false);
+					
+					_refUploadFile.addEventListener(Event.OPEN, function(evt:Event):void { MonsterDebugger.trace(this, evt) } );
+					_refUploadFile.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(evt:DataEvent):void { MonsterDebugger.trace(this, evt) } );
+					_refUploadFile.addEventListener(HTTPStatusEvent.HTTP_STATUS, function(evt:HTTPStatusEvent):void{MonsterDebugger.trace(this, evt)});
+					
 					
 					MonsterDebugger.trace(this, "started");
 					
@@ -209,6 +212,7 @@
 				_refUploadFile.removeEventListener(Event.COMPLETE, onUploadComplete);
 				_refUploadFile.removeEventListener(IOErrorEvent.IO_ERROR, onUploadIoError);
 				_refUploadFile.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadSecurityError);
+				_refUploadFile.removeEventListener(HTTPStatusEvent.HTTP_STATUS, onUploadStatusError );
 				_refUploadFile.cancel();
 				_numCurrentUpload = 0;
 				updateProgBar();
@@ -235,7 +239,8 @@
 			private function updateProgBar(numPerc:Number = 0):void {
 				var strLabel:String = (_numCurrentUpload + 1) + "/" + _arrUploadFiles.length;
 				strLabel = (_numCurrentUpload + 1 <= _arrUploadFiles.length && numPerc > 0 && numPerc < 100) ? numPerc + "% - " + strLabel : strLabel;
-				strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? "Upload Complete - " + strLabel : strLabel;
+				// strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? "Upload Complete - " + strLabel : strLabel;	// EN
+				strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? "Invio Completato - " + strLabel : strLabel;
 				strLabel = (_arrUploadFiles.length == 0) ? "" : strLabel;
 				progBar.label = strLabel;
 				progBar.setProgress(numPerc, 100);
@@ -250,6 +255,12 @@
 				} else {
 					enableUI();
 					clearUpload();
+					
+					listFiles.dataProvider.removeAll();
+					
+					_arrUploadFiles = new Array();
+					updateProgBar();
+					
 					dispatchEvent(new Event("uploadComplete"));
 				}
 			}
@@ -265,6 +276,14 @@
 			private function onUploadSecurityError(event:SecurityErrorEvent):void {
 				clearUpload();
 				var evt:SecurityErrorEvent = new SecurityErrorEvent("uploadSecurityError", false, false, event.text);
+				dispatchEvent(evt);
+			}
+			
+			// Called on upload status error
+			private function onUploadStatusError(event:HTTPStatusEvent):void {
+				MonsterDebugger.trace('onUploadStatusError', evt)
+				clearUpload();
+				var evt:HTTPStatusEvent = new HTTPStatusEvent("uploadStatusError", false, false, event.status);
 				dispatchEvent(evt);
 			}
 			
