@@ -15,12 +15,15 @@
 			
 			*/
 			
-			import mx.controls.*;
-			import mx.managers.*;
-            import mx.events.*;
-			import flash.events.*;
-			import flash.net.*;
 			import com.demonsters.debugger.MonsterDebugger;
+			
+			import flash.events.*;
+			import flash.external.*;
+			import flash.net.*;
+			
+			import mx.controls.*;
+			import mx.events.*;
+			import mx.managers.*;
 			
 			private var _strUploadUrl:String;
 			private var _refAddFiles:FileReferenceList;	
@@ -28,11 +31,21 @@
 			private var _arrUploadFiles:Array;
 			private var _numCurrentUpload:Number = 0;
 			private var _uploadFieldName:String = 'file';	// Setting for the upload field name within a $_FILE request
+			private var _uploadCompleteJSCallback:String = null;	// ExternalInterface JavaScript callback on upload complete
 			
 			[Bindable]
 			public var skinClass:Class;
 			
-
+			// Getter & setter: _uploadCompleteJSCallback
+			public function set uploadCompleteJSCallback(val:String):void {
+				this._uploadCompleteJSCallback = val;
+			}
+			
+			public function get uploadCompleteJSCallback():String {
+				return this._uploadCompleteJSCallback;
+			}
+			// ------------------------------------------
+			
 			// Set method: uploadFieldName
 			public function set uploadFieldName(val:String):void {
 				if(val == null) return;
@@ -181,10 +194,13 @@
 			
 			// Called to upload file based on current upload number
 			private function startUpload():void {
-				MonsterDebugger.trace(this, "startUpload");
+				MonsterDebugger.trace("FileReference", _numCurrentUpload, "", "_numCurrentUpload");
 				if (_arrUploadFiles.length > 0) {
+					MonsterDebugger.trace("FileReference", _arrUploadFiles.length, "", "_arrUploadFiles.length");
 					
-					MonsterDebugger.trace(this, _arrUploadFiles.length);
+					if(_refUploadFile != null) {
+						_clearFileReferenceListeners();
+					}
 					
 					disableUI();
 					
@@ -195,37 +211,49 @@
 					var sendVars:URLVariables = new URLVariables();
 					sendVars.action = "upload";
 					
+					// Get the cookies
+					//ExternalInterface.call('eval','window.cookieStr = function () {return  document.cookie};')
+					//var cookieStr:String = ExternalInterface.call('cookieStr'); 
+					//var cookieHeader:URLRequestHeader = new URLRequestHeader("Cookie",cookieStr);
+					
+					//MonsterDebugger.trace(this, cookieHeader);
+					
 					var request:URLRequest = new URLRequest();
 					request.data = sendVars;
-				    request.url = _strUploadUrl;
-					MonsterDebugger.trace(this, _strUploadUrl);
+				    request.url = _strUploadUrl;;
 				    request.method = URLRequestMethod.POST;
+					//request.requestHeaders.push(cookieHeader);
+					MonsterDebugger.trace("URLRequestMethod", request);
 				    _refUploadFile = new FileReference();
 				    _refUploadFile = listFiles.selectedItem.file;
+					
 				    _refUploadFile.addEventListener(ProgressEvent.PROGRESS, onUploadProgress);
 				   	_refUploadFile.addEventListener(Event.COMPLETE, onUploadComplete);
 				    _refUploadFile.addEventListener(IOErrorEvent.IO_ERROR, onUploadIoError);
 				  	_refUploadFile.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadSecurityError);
 					_refUploadFile.addEventListener(HTTPStatusEvent.HTTP_STATUS, onUploadStatusError );
+					_refUploadFile.addEventListener(Event.OPEN, onEventOpen );
+					_refUploadFile.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, onDataEventUCD );
+					
 					_refUploadFile.upload(request, this._uploadFieldName, false);
 					
-					_refUploadFile.addEventListener(Event.OPEN, function(evt:Event):void { MonsterDebugger.trace(this, evt) } );
-					_refUploadFile.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(evt:DataEvent):void { MonsterDebugger.trace(this, evt) } );
-					_refUploadFile.addEventListener(HTTPStatusEvent.HTTP_STATUS, function(evt:HTTPStatusEvent):void{MonsterDebugger.trace(this, evt)});
-					
-					
-					MonsterDebugger.trace(this, "started");
-					
+					MonsterDebugger.trace("FileReference", "upload");
 				}
 			}
-			
-			// Cancel and clear eventlisteners on last upload
-			private function clearUpload():void {
+
+			private function _clearFileReferenceListeners():void {
 				_refUploadFile.removeEventListener(ProgressEvent.PROGRESS, onUploadProgress);
 				_refUploadFile.removeEventListener(Event.COMPLETE, onUploadComplete);
 				_refUploadFile.removeEventListener(IOErrorEvent.IO_ERROR, onUploadIoError);
 				_refUploadFile.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadSecurityError);
 				_refUploadFile.removeEventListener(HTTPStatusEvent.HTTP_STATUS, onUploadStatusError );
+				_refUploadFile.removeEventListener(Event.OPEN, onEventOpen );
+				_refUploadFile.removeEventListener(DataEvent.UPLOAD_COMPLETE_DATA, onDataEventUCD );
+			}
+			
+			// Cancel and clear eventlisteners on last upload
+			private function clearUpload():void {
+				this._clearFileReferenceListeners();
 				_refUploadFile.cancel();
 				_numCurrentUpload = 0;
 				updateProgBar();
@@ -240,12 +268,11 @@
 			
 			// Get upload progress
 			private function onUploadProgress(event:ProgressEvent):void {
-				MonsterDebugger.trace(this, "ProgressEvent");
+				MonsterDebugger.trace("FileReference", event, "", "ProgressEvent");
 				var numPerc:Number = Math.round((event.bytesLoaded / event.bytesTotal) * 100);
 				updateProgBar(numPerc);
 				var evt:ProgressEvent = new ProgressEvent("uploadProgress", false, false, event.bytesLoaded, event.bytesTotal);
 				dispatchEvent(evt);
-				MonsterDebugger.trace(this, numPerc);
 			}
 			
 			// Update progBar
@@ -262,6 +289,7 @@
 			
 			// Called on upload complete
 			private function onUploadComplete(event:Event):void {
+				MonsterDebugger.trace("FileReference", event, "", "Event.COMPLETE")
 				_numCurrentUpload++;				
 				if (_numCurrentUpload < _arrUploadFiles.length) {
 					startUpload();
@@ -274,28 +302,51 @@
 					_arrUploadFiles = new Array();
 					updateProgBar();
 					
+					try {
+						if(this._uploadCompleteJSCallback != null && ExternalInterface.available) {
+							MonsterDebugger.trace("FileReference", this._uploadCompleteJSCallback, "", "ExternalInterface.call"); 
+							ExternalInterface.call(this._uploadCompleteJSCallback);
+						}
+					}
+					catch(ex:Error) {
+						MonsterDebugger.trace("FileReference", ex, "", "ExternalInterface.call"); 
+					}
+					
 					dispatchEvent(new Event("uploadComplete"));
 				}
 			}
 			
+			private function onEventOpen(evt:Event):void {
+				MonsterDebugger.trace("FileReference", evt, "", "Event.OPEN");
+			}
+			
+			private function onDataEventUCD(evt:DataEvent):void {
+				MonsterDebugger.trace("FileReference", evt, "", "DataEvent.UPLOAD_COMPLETE_DATA");
+			}
+			
 			// Called on upload io error
 			private function onUploadIoError(event:IOErrorEvent):void {
-				clearUpload();
+				MonsterDebugger.trace("FileReference", event, "", "IOErrorEvent")
+				enableUI();
+				
 				var evt:IOErrorEvent = new IOErrorEvent("uploadIoError", false, false, event.text);
 				dispatchEvent(evt);
 			}
 			
 			// Called on upload security error
 			private function onUploadSecurityError(event:SecurityErrorEvent):void {
-				clearUpload();
+				MonsterDebugger.trace("FileReference", event, "", "SecurityErrorEvent")
+				enableUI();
+				
 				var evt:SecurityErrorEvent = new SecurityErrorEvent("uploadSecurityError", false, false, event.text);
 				dispatchEvent(evt);
 			}
 			
 			// Called on upload status error
 			private function onUploadStatusError(event:HTTPStatusEvent):void {
-				MonsterDebugger.trace('onUploadStatusError', evt)
-				clearUpload();
+				MonsterDebugger.trace("FileReference", event, "", "HTTPStatusEvent")
+				enableUI();
+				
 				var evt:HTTPStatusEvent = new HTTPStatusEvent("uploadStatusError", false, false, event.status);
 				dispatchEvent(evt);
 			}

@@ -16,14 +16,19 @@
 			private var _strUploadScript:String = null;
 			[Bindable]
 			private var _strUploadFieldName:String = null;
+			[Bindable]
+			private var _strUploadCompleteJSCallback:String = null;
 			
 			private function initVars():void {
 				MonsterDebugger.initialize(this);
 				
-				_strUploadScript	= this.parameters.uploadScript;
-				_strUploadFieldName	= this.parameters.uploadFieldName;
+				_strUploadScript				= this.parameters.uploadScript;
+				_strUploadFieldName				= this.parameters.uploadFieldName;
+				_strUploadCompleteJSCallback	= this.parameters.uploadCompleteJSCallback;
+				
 				MonsterDebugger.trace('creationComplete parameter uploadScript', _strUploadScript);
 				MonsterDebugger.trace('creationComplete parameter uploadFieldName', _strUploadFieldName);
+				MonsterDebugger.trace('creationComplete parameter uploadCompleteJSCallback', _strUploadCompleteJSCallback);
 			}
 		]]>
 	</fx:Script>
@@ -41,6 +46,7 @@
 			width="100%" height="100%"
 			uploadUrl="{_strUploadScript}"
 			uploadFieldName="{_strUploadFieldName}"
+			uploadCompleteJSCallback="{_strUploadCompleteJSCallback}"
 			uploadComplete="Alert.show('Invio completato con successo.', 'Upload completato')" 
 			uploadIOError="Alert.show('Errore di IO.', 'Errore')" 
 			uploadSecurityError="Alert.show('Errore di sicurezza.', 'Errore')"
