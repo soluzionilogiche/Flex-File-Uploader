@@ -26,10 +26,23 @@
 			private var _refAddFiles:FileReferenceList;	
 			private var _refUploadFile:FileReference;
 			private var _arrUploadFiles:Array;
-			private var _numCurrentUpload:Number = 0;			
+			private var _numCurrentUpload:Number = 0;
+			private var _uploadFieldName:String = 'file';	// Setting for the upload field name within a $_FILE request
 			
 			[Bindable]
 			public var skinClass:Class;
+			
+
+			// Set method: uploadFieldName
+			public function set uploadFieldName(val:String):void {
+				if(val == null) return;
+				this._uploadFieldName = val;
+			}
+			
+			// Get method: uploadFieldName 
+			public function get uploadFieldName():String{
+				return this._uploadFieldName;
+			}     
 			
 			// Set uploadUrl
 			public function set uploadUrl(strUploadUrl:String):void {
@@ -194,7 +207,7 @@
 				    _refUploadFile.addEventListener(IOErrorEvent.IO_ERROR, onUploadIoError);
 				  	_refUploadFile.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onUploadSecurityError);
 					_refUploadFile.addEventListener(HTTPStatusEvent.HTTP_STATUS, onUploadStatusError );
-					_refUploadFile.upload(request, "file", false);
+					_refUploadFile.upload(request, this._uploadFieldName, false);
 					
 					_refUploadFile.addEventListener(Event.OPEN, function(evt:Event):void { MonsterDebugger.trace(this, evt) } );
 					_refUploadFile.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, function(evt:DataEvent):void { MonsterDebugger.trace(this, evt) } );
