@@ -14,46 +14,33 @@
 		[Event(name="uploadSecurityError", type="flash.events.SecurityErrorEvent")]
 		[Event(name="uploadStatusError", type="flash.events.HTTPStatusEvent")]
 	</fx:Metadata>
-		
-		
-	<s:Panel width="100%" height="100%" minWidth="400" minHeight="200" creationComplete="initCom()"
-			 skinClass="{skinClass}">
-		
-		
-		
+	
+	<s:Panel width="100%" height="100%" minWidth="400" minHeight="200" creationComplete="initCom()" skinClass="{skinClass}">
+				
 		<fx:Script source="FileUploadCtl.as" />
-		
-		
+				
 		<s:Group width="100%" height="80%">
 			<mx:DataGrid id="listFiles" left="0" top="0" bottom="0" right="0"
 				allowMultipleSelection="true" verticalScrollPolicy="on"
 				draggableColumns="false" resizableColumns="false" sortableColumns="false">
 				<mx:columns>
 					<!-- EN: File -->
-					<mx:DataGridColumn headerText="Nome" dataField="name" wordWrap="true"/>
+					<mx:DataGridColumn headerText="{resourceManager.getString('Strings', 'dgrid_name')}" dataField="name" wordWrap="true"/>
 					<!-- EN: Size -->
-					<mx:DataGridColumn headerText="Dimensione" dataField="size" width="90" textAlign="right"/>
+					<mx:DataGridColumn headerText="{resourceManager.getString('Strings', 'dgrid_size')}" dataField="size" width="90" textAlign="right"/>
 				</mx:columns>
 			</mx:DataGrid>
 		</s:Group>
 		<s:Label text="" id="feedbackMsg" bottom="0"></s:Label>
 		
 		<s:controlBarContent>
-
-			<!-- EN: Add file(s) -->
-			<mx:Button id="btnAdd" toolTip="Aggiungi files" click="addFiles()" icon="@Embed('assets/add.png')" width="26"/>
-			
-			<!-- EN: Remove file(s) -->
-			<mx:Button id="btnRemove" toolTip="Rimuovi files" click="removeFiles()" icon="@Embed('assets/delete.png')" width="26"/>
+			<mx:Button id="btnAdd" toolTip="{resourceManager.getString('Strings', 'tt_addfile')}" click="addFiles()" icon="@Embed('assets/add.png')" width="26"/>
+			<mx:Button id="btnRemove" toolTip="{resourceManager.getString('Strings', 'tt_removefile')}" click="removeFiles()" icon="@Embed('assets/delete.png')" width="26"/>
 			
 			<mx:ProgressBar id="progBar" mode="manual" label="" labelPlacement="center" width="100%"/>
 			
-			<!-- EN: Cancel upload -->
-			<mx:Button id="btnCancel" toolTip="Annulla invio" icon="@Embed('assets/cancel2.png')" width="26" click="onUploadCanceled()"/>
-			
-			<!-- EN: Uploas file(s) -->
-			<mx:Button label="Invia" toolTip="Invia files" id="btnUpload" click="startUpload()" icon="@Embed('assets/bullet_go.png')"/>
-			
+			<mx:Button id="btnCancel" toolTip="{resourceManager.getString('Strings', 'tt_uploadcancel')}" icon="@Embed('assets/cancel2.png')" width="26" click="onUploadCanceled()"/>
+			<mx:Button label="{resourceManager.getString('Strings', 'btn_uploadstart')}" toolTip="{resourceManager.getString('Strings', 'tt_uploadstart')}" id="btnUpload" click="startUpload()" icon="@Embed('assets/bullet_go.png')"/>
 		</s:controlBarContent>
 
 	</s:Panel>

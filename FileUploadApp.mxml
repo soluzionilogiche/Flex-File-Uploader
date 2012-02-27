@@ -6,9 +6,15 @@
 				creationComplete="initVars()"
 				>
 	
+	<fx:Metadata>
+		[ResourceBundle("Strings")]
+	</fx:Metadata> 
+	
 	<fx:Script>
 		<![CDATA[
 			import com.demonsters.debugger.MonsterDebugger;
+			
+			import it.soloict.VersionControl;
 			
 			import mx.controls.Alert;
 			
@@ -18,39 +24,38 @@
 			private var _strUploadFieldName:String = null;
 			[Bindable]
 			private var _strUploadCompleteJSCallback:String = null;
+			[Bindable]
+			private var _boolMonsterDebug:Boolean = false;
 			
 			private function initVars():void {
-				MonsterDebugger.initialize(this);
-				
 				_strUploadScript				= this.parameters.uploadScript;
 				_strUploadFieldName				= this.parameters.uploadFieldName;
 				_strUploadCompleteJSCallback	= this.parameters.uploadCompleteJSCallback;
+				_boolMonsterDebug				= this.parameters.monsterDebug;
 				
+				if(_boolMonsterDebug) MonsterDebugger.initialize(this);
+				
+				VersionControl.getInstance(this);
+				
+				MonsterDebugger.trace('Capabilities.language', Capabilities.language);
 				MonsterDebugger.trace('creationComplete parameter uploadScript', _strUploadScript);
 				MonsterDebugger.trace('creationComplete parameter uploadFieldName', _strUploadFieldName);
 				MonsterDebugger.trace('creationComplete parameter uploadCompleteJSCallback', _strUploadCompleteJSCallback);
+				MonsterDebugger.trace('creationComplete parameter monsterDebug', _boolMonsterDebug);
 			}
 		]]>
 	</fx:Script>
 	
 	<s:Group width="400" height="300" horizontalCenter="0" verticalCenter="0">
-		<!--
-		Event messages translations:
-		EN:
-			uploadComplete:			"Alert.show('File(s) have been uploaded.', 'Upload successful')"
-			uploadIOError:			"Alert.show('IO Error in uploading file.', 'Error')"
-			uploadSecurityError:	"Alert.show('Security Error in uploading file.', 'Error')"
-			uploadStatusError:		n/a
-		-->
 		<com:FileUpload skinClass="skins.FileUploadSkin"
 			width="100%" height="100%"
 			uploadUrl="{_strUploadScript}"
 			uploadFieldName="{_strUploadFieldName}"
 			uploadCompleteJSCallback="{_strUploadCompleteJSCallback}"
-			uploadComplete="Alert.show('Invio completato con successo.', 'Upload completato')" 
-			uploadIOError="Alert.show('Errore di IO.', 'Errore')" 
-			uploadSecurityError="Alert.show('Errore di sicurezza.', 'Errore')"
-			uploadStatusError="Alert.show('Risposta errata dal server.', 'Errore')"
+			uploadComplete="Alert.show(resourceManager.getString('Strings', 'uploadComplete_text'), resourceManager.getString('Strings', 'uploadComplete_title'))" 
+			uploadIOError="Alert.show(resourceManager.getString('Strings', 'uploadIOError_text'), resourceManager.getString('Strings', 'uploadIOError_title'))" 
+			uploadSecurityError="Alert.show(resourceManager.getString('Strings', 'uploadSecurityError_text'), resourceManager.getString('Strings', 'uploadSecurityError_title'))"
+			uploadStatusError="Alert.show(resourceManager.getString('Strings', 'uploadStatusError_text'), resourceManager.getString('Strings', 'uploadStatusError_title'))"
 		/>
 	</s:Group>
 </s:Application>

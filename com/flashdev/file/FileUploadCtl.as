@@ -24,6 +24,8 @@
 			import mx.controls.*;
 			import mx.events.*;
 			import mx.managers.*;
+			import mx.resources.ResourceManager;
+			import mx.utils.StringUtil;
 			
 			private var _strUploadUrl:String;
 			private var _refAddFiles:FileReferenceList;	
@@ -68,8 +70,7 @@
 				enableUI();
 				uploadCheck();
 				
-				// updateStatus("Status: no files selected.");	// EN
-				updateStatus("Stato: nessun file selezionato.");	// IT
+				updateStatus(ResourceManager.getInstance().getString("Strings", "status_noselection"));
 			}
 			
 			// Called to add file(s) for upload
@@ -103,15 +104,16 @@
 					listFiles.selectedIndex = _arrUploadFiles.length - 1;
 				}				
 				if (arrFoundList.length >= 1) {
-					// Alert.show("The file(s): \n\n• " + arrFoundList.join("\n• ") + "\n\n...are already on the upload list. Please change the filename(s) or pick a different file.", "File(s) already on list");		// EN
-					Alert.show("I files: \n\n• " + arrFoundList.join("\n• ") + "\n\n... sono già in lista. Cambiare il nome del file o selezionarne altri.", "File già in lista");	// IT
+					Alert.show(
+						StringUtil.substitute(ResourceManager.getInstance().getString("Strings", "alert_fileduplicate_text"), arrFoundList.join("\n• ")),
+						ResourceManager.getInstance().getString("Strings", "alert_fileduplicate_title")
+					);
 				}
 				updateProgBar();
 				scrollFiles();
 				uploadCheck();
 				
-				// updateStatus("Status: files selected for upload.");	// EN
-				updateStatus("Stato: files pronti per essere inviati.");	// IT
+				updateStatus( ResourceManager.getInstance().getString("Strings", "status_ready") );
 			}
 			
 			// Called to format number to file size
@@ -279,8 +281,7 @@
 			private function updateProgBar(numPerc:Number = 0):void {
 				var strLabel:String = (_numCurrentUpload + 1) + "/" + _arrUploadFiles.length;
 				strLabel = (_numCurrentUpload + 1 <= _arrUploadFiles.length && numPerc > 0 && numPerc < 100) ? numPerc + "% - " + strLabel : strLabel;
-				// strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? "Upload Complete - " + strLabel : strLabel;	// EN
-				strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? "Invio Completato - " + strLabel : strLabel;
+				strLabel = (_numCurrentUpload + 1 == _arrUploadFiles.length && numPerc == 100) ? ResourceManager.getInstance().getString("Strings", "pb_sendcomplete") + strLabel : strLabel;
 				strLabel = (_arrUploadFiles.length == 0) ? "" : strLabel;
 				progBar.label = strLabel;
 				progBar.setProgress(numPerc, 100);
