@@ -15,6 +15,14 @@ package it.soloict
 	
 	import spark.components.Application;
 	
+	/*
+	This technique has been found in a blog by:
+	Anthony McCormick
+		twitter: @Omnipitence
+		blog: http://www.betadesigns.co.uk/Blog/2008/06/24/application-version-control-in-as3/
+	
+	- Slightly adapter for Flex 4
+	*/
 	[ResourceBundle("VersionControl")]
 	public class VersionControl
 	{
@@ -35,13 +43,13 @@ package it.soloict
 			var cm : ContextMenu = new ContextMenu( );
 			for( var i : String in rbi )
 			{
-				var properties     : Array = String( rbi[ i ] ).split( '&' );
-				var value         : String = properties[ 0 ];
-				var separator     : Boolean = properties[ 1 ] ? properties[ 1 ] == 'false' ? false : true : true;
-				var enabled        : Boolean = properties[ 2 ] ? properties[ 2 ] == 'false' ? false : true : true;
-				var visible        : Boolean = properties[ 3 ] ? properties[ 3 ] == 'false' ? false : true : true;
-				var open        : Boolean = properties[ 4 ] ? properties[ 4 ] == 'false' ? false : true : true;
-				var cmi : ContextMenuItem = new ContextMenuItem( value, separator, enabled, visible );
+				var properties	: Array = String( rbi[ i ] ).split( '&' );
+				var value		: String = properties[ 0 ];
+				var separator	: Boolean = properties[ 1 ] ? properties[ 1 ] == 'false' ? false : true : true;
+				var enabled		: Boolean = properties[ 2 ] ? properties[ 2 ] == 'false' ? false : true : true;
+				var visible		: Boolean = properties[ 3 ] ? properties[ 3 ] == 'false' ? false : true : true;
+				var open		: Boolean = properties[ 4 ] ? properties[ 4 ] == 'false' ? false : true : true;
+				var cmi			: ContextMenuItem = new ContextMenuItem( value, separator, enabled, visible );
 				cm.customItems.push( cmi ); 
 				cm.hideBuiltInItems( );            
 				if( open )
